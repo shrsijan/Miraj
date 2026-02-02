@@ -1,0 +1,34 @@
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+        <defs>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Rozha+One&amp;display=swap');
+            .text { font-family: 'Rozha One', serif; font-size: 200px; fill: #18181b; }
+            .line { fill: #18181b; }
+          </style>
+        </defs>
+        
+        <!-- Background -->
+        <rect width="1024" height="1024" fill="#ffffff"/>
+        
+        <!-- Group centered in the square -->
+        <g transform="translate(512, 512)">
+           <!-- 
+             Calculations based on 200px font size:
+             Line Height (thickness): 0.12em = 24px
+             Line Top Offset: 0.18em = 36px (from top of em box)
+             
+             Visual centering adjustment needed because font baseline varies.
+             We center the text at (0,0).
+           -->
+           
+           <!-- The Shirorekha (Top Line) -->
+           <!-- Width: slightly wider than text. Approx 600px width for "MIRAJ" at 200px font -->
+           <!-- Y position: positioned relative to text top -->
+           <rect x="-310" y="-85" width="620" height="24" rx="2" class="line" />
+
+           <!-- Text -->
+           <text x="0" y="80" text-anchor="middle" class="text">MIRAJ</text>
+        </g>
+      </svg>
+    
