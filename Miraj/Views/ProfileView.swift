@@ -98,6 +98,7 @@ struct ProfileView: View {
     }
     
     private func logout() {
+        NotificationManager.unregisterNotifications()
         User.logout { result in
             DispatchQueue.main.async {
                 switch result {

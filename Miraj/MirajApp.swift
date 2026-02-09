@@ -50,8 +50,12 @@ struct MirajApp: App {
             .onAppear {
                 // Check login status after Parse is initialized
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isLoggedIn = User.current != nil
+                    let loggedIn = User.current != nil
+                    isLoggedIn = loggedIn
                     isCheckingLogin = false
+                    if loggedIn {
+                        NotificationManager.requestPermissionAndSchedule()
+                    }
                 }
             }
         }

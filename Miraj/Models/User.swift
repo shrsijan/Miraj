@@ -23,5 +23,6 @@ struct User: ParseUser {
     var password: String?
     var authData: [String: [String: String]?]?
     
-    // Custom fields (add any additional user fields here)
+    // Custom fields
+    var lastPostedAt: Date?
 }

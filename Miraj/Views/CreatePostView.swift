@@ -10,6 +10,65 @@ import Photos
 import ParseSwift
 import CoreLocation
 
+// MARK: - Camera Picker (UIImagePickerController wrapper)
+struct CameraPicker: UIViewControllerRepresentable {
+    @Binding var imageData: Data?
+    @Binding var cameraLocation: CLLocation?
+    @Environment(\.dismiss) var dismiss
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.cameraDevice = .rear
+        picker.delegate = context.coordinator
+        // Start getting location when camera opens
+        context.coordinator.startLocationUpdates()
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate, CLLocationManagerDelegate {
+        let parent: CameraPicker
+        private let locationManager = CLLocationManager()
+        private var currentLocation: CLLocation?
+
+        init(_ parent: CameraPicker) {
+            self.parent = parent
+            super.init()
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        }
+
+        func startLocationUpdates() {
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.startUpdatingLocation()
+        }
+
+        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            currentLocation = locations.last
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.imageData = image.jpegData(compressionQuality: 0.9)
+            }
+            parent.cameraLocation = currentLocation
+            locationManager.stopUpdatingLocation()
+            parent.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            locationManager.stopUpdatingLocation()
+            parent.dismiss()
+        }
+    }
+}
+
 struct CreatePostView: View {
     @State private var selectedImageData: Data?
     @State private var caption = ""
@@ -24,7 +83,10 @@ struct CreatePostView: View {
     @State private var locationName: String?
     @State private var latitude: Double?
     @State private var longitude: Double?
-    
+    @State private var showCamera = false
+    @State private var cameraImageData: Data?
+    @State private var cameraLocation: CLLocation?
+
     private let imageManager = PHCachingImageManager()
     private let geocoder = CLGeocoder()
     
@@ -81,6 +143,42 @@ struct CreatePostView: View {
         } message: {
             Text(errorMessage)
         }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker(imageData: $cameraImageData, cameraLocation: $cameraLocation)
+                .ignoresSafeArea()
+        }
+        .onChange(of: cameraImageData) { _, newData in
+            if let data = newData {
+                selectedImageData = data
+                selectedAsset = nil
+                // Extract location from the device's GPS at time of capture
+                if let location = cameraLocation {
+                    latitude = location.coordinate.latitude
+                    longitude = location.coordinate.longitude
+                    geocoder.reverseGeocodeLocation(location) { placemarks, _ in
+                        DispatchQueue.main.async {
+                            if let placemark = placemarks?.first {
+                                var parts: [String] = []
+                                if let locality = placemark.locality {
+                                    parts.append(locality)
+                                }
+                                if let country = placemark.country, parts.isEmpty {
+                                    parts.append(country)
+                                } else if let state = placemark.administrativeArea, parts.count == 1 {
+                                    parts.append(state)
+                                }
+                                self.locationName = parts.joined(separator: ", ")
+                            }
+                        }
+                    }
+                } else {
+                    locationName = nil
+                    latitude = nil
+                    longitude = nil
+                }
+                showCaptionStep = true
+            }
+        }
     }
     
     // MARK: - Photo Selection View
@@ -131,7 +229,25 @@ struct CreatePostView: View {
             
             Divider()
                 .background(Color.white.opacity(0.2))
-            
+
+            // Camera button
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button(action: { showCamera = true }) {
+                    HStack {
+                        Image(systemName: "camera.fill")
+                        Text("Take Photo")
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
+
             // Bottom: Photo gallery
             if authorizationStatus == .authorized || authorizationStatus == .limited {
                 ScrollView {
@@ -370,6 +486,11 @@ struct CreatePostView: View {
                 
                 switch result {
                 case .success:
+                    // Update user's lastPostedAt
+                    if var user = User.current {
+                        user.lastPostedAt = Date()
+                        user.save { _ in }
+                    }
                     showSuccess = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription

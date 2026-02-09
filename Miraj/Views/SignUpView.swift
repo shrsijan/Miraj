@@ -109,6 +109,7 @@ struct SignUpView: View {
                 
                 switch result {
                 case .success:
+                    NotificationManager.requestPermissionAndSchedule()
                     isLoggedIn = true
                 case .failure(let error):
                     errorMessage = error.localizedDescription
