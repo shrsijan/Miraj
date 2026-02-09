@@ -1,48 +1,46 @@
-# Project 2 - *Miraj*
+# Project 3 - *Miraj*
 
 Submitted by: **Sijan Shrestha**
 
 **Miraj** is a social media app that allows users to share photos with captions, like and comment on posts, and connect with others through a clean, minimalist interface.
 
-Time spent: **8** hours spent in total
+Time spent: **12** hours spent in total
 
 ## Required Features
 
 The following **required** functionality is completed:
 
-- [x] Users see an app icon in the home screen and a styled launch screen.
-- [x] User can register a new account
-- [x] User can log in with newly created account
-- [x] App has a feed of posts when user logs in
-- [x] User can upload a new post which takes in a picture from photo library and an optional caption	
-- [x] User is able to logout	
- 
-The following **optional** features are implemented:
+- [x] Users are able to use the back camera to take a photo and upload it to the server OR user uploads unique photo from photo album
+- [x] Posts have comment section, which displays commentor's username and comment context
+- [x] Posts have a time and location attached to them
+- [x] Get Photo Metadata (GPS location extracted from photo library assets; device location captured for camera photos)
+- [x] Users are not able to see other users' photos until they upload their own
+- [x] Fetch the 10 most recent photos within the last 24 hours from the server
+- [x] Of those returned in the response, only show the post if the createdAt property is within 24 hours of the logged in user's last post
+- [x] Posts outside the 24-hour window are blurred with a "Post to reveal" overlay
 
-[] Users can pull to refresh their feed and see a loading indicator
-- [x] Users can infinite-scroll in their feed to see past the 10 most recent photos
-- [x] Users can see location and time of photo upload in the feed	
-- [x] User stays logged in when app is closed and open again	
+The following **stretch** features are implemented:
 
+- [x] Users receive a local notification reminder to post every 8 hours
+- [x] Notification permissions requested after successful login/signup
+- [x] Notifications unregistered on logout
 
 The following **additional** features are implemented:
 
 - [x] Like posts with heart animation and like count
 - [x] Comment on posts with inline display (up to 3 comments shown)
-- [x] Inline comment input below posts
+- [x] Full comment thread view
 - [x] Edit profile (change username and email)
 - [x] Edit post captions
 - [x] Delete own posts
-- [x] Custom inline photo gallery picker 
-- [x] Location metadata extraction from photos using GPS data
+- [x] Custom inline photo gallery picker
 - [x] Variable photo dimension support
+- [x] Pull to refresh feed
+- [x] User stays logged in when app is closed and opened again
+- [x] Custom `lastPostedAt` property added to User model via Parse-Swift
 
 ## Video Walkthrough
-
-https://github.com/user-attachments/assets/0691104b-6acb-4dcb-9b48-7251c82eeb85
-
-
-
+coming
 ## Notes
 
 Challenges encountered while building the app:
@@ -51,6 +49,10 @@ Challenges encountered while building the app:
 - Handling variable photo dimensions while maintaining consistent UI layout
 - Extracting and displaying location metadata from photo assets
 - Implementing inline photo gallery picker instead of system PhotosPicker popup
+- Wrapping UIImagePickerController in a SwiftUI UIViewControllerRepresentable for camera access
+- Capturing device GPS location at camera capture time using CLLocationManager
+- Implementing 24-hour post visibility window with blur overlay for restricted posts
+- Scheduling repeating local notifications with UNTimeIntervalNotificationTrigger
 
 ## License
 
