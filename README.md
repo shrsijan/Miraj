@@ -40,7 +40,11 @@ The following **additional** features are implemented:
 - [x] Custom `lastPostedAt` property added to User model via Parse-Swift
 
 ## Video Walkthrough
-coming
+
+
+https://github.com/user-attachments/assets/663afac2-7f40-4fcc-aa2e-3e91919299e6
+
+
 ## Notes
 
 Challenges encountered while building the app:
